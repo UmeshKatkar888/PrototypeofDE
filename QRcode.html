@@ -1,0 +1,107 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="QRcode.css">
+
+</head>
+
+<body>
+    <div id="option">
+        <div id="btn2" class="active">&#8230;</div>
+        <div id="btn1">&#9974;</div>
+    </div>
+    <div id="main">
+        <div id="box1">
+            <div id="inputs">
+                <input  onchange="genrate()" text" id="qr-data" placeholder="Enter details">
+                <div id="msg"> Hit Enter</div>
+            </div>
+            <div id="Outputbox">
+                <img src="QRcode.png">
+            </div>
+        </div>
+
+        <div id="box2">
+            <div id="scanner">
+                <button id="stopbtn">Stop</button>
+                <div id="startbtn">
+                    <img src="video.png">
+                </div>
+                <video id="preview" class="p-1 border" style="Width:300px;"></video>
+                <div id="msg2"></div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="qrcode.min.js"></script>
+<script>
+    var qrdata = document.getElementById('qr-data');
+    var qrcode = new QRCode(document.getElementById('Outputbox'));
+    function genrate() {
+        var data = qrdata.value;
+        qrcode.makeCode(data);
+    }
+   
+</script>
+<script src="path/to/qr-scanner.umd.min.js"></script>
+<script type="text/javascript">
+    $('#btn2').click(function () {
+        $('#main').animate({ 'left': '-100%' });
+        $('#btn1').removeClass('active');
+        $('#btn2').addClass('active');
+    });
+    $('#stopbtn').click(function () {
+        $('#startbtn img').show();
+        $('#stopbtn').hide();
+        var videoE1 = document.getElementById('preview');
+        stream = videoE1.srcObject;
+        tracks = stream.getTracks();
+        tracks.forEach(function (track) {
+            track.stop();
+
+
+        });
+        videoE1.srcObject = null;
+    });
+
+    $('#startbtn').click(function () {
+        $('#startbtn img').hide();
+        $('#stopbtn').show();
+        var scanner = new Instascan.Scanner({ video: document.getElementById('preview'), scanPeriod: 5, mirror: false });
+        scanner.addlistener('scan', function (content) {
+            $('#msg2').text(content);
+        });
+        Instascan.Camera.getCameras().then(function (cameras) {
+            if (cameras.lenght > 0) {
+                scanner.start(cameras[0]);
+                $('[name="options"]').on('change', function () {
+                    if ($(this).val() == 1) {
+                        if (cameras[0] != "") {
+                            scanner.start(cameras[0]);
+
+                        } else {
+                            alert('camera not found');
+                        }
+                    }
+                    else if ($(this).val() == 2) {
+                        if (cameras[1] != "") {
+                            scanner.start(cameras[1]);
+                        }
+                        else {
+                            alert('no back cmaera found');
+                        }
+
+                    }
+                });
+            }
+            else {
+                alert('no camera found');
+            }
+        }).catch(function (e) {
+            alert(e)
+        });
+
+    });
+</script>
+
+</html>
